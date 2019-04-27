@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse,resolve
-from datetime import date
+from datetime import date,timedelta
 
 from .models import Unit
-from .views import home, UnitNew
+from .views import home, UnitNew,unit_detil
 from .form import UnitForm
 
 # Create your tests here.
@@ -17,10 +17,26 @@ class Test_View_Home(TestCase):
 
     def test_url_resolve_home_view(self):
         view = resolve('/')
-        self.assertEqual(view.func,home)
+        self.assertEqual(view.func.__name__,home.__name__)
 
     def test_view_using_correct_template(self):
         self.assertTemplateUsed(self.response,'home.html')
+
+class Test_View_Unit_Detil(TestCase):
+    def setUp(self):
+        unit=Unit.objects.create(code='abcd',type='d',date_assign=date(2017,5,5))
+        url = reverse('unitdetil',kwargs={'pk':unit.pk})
+        self.response=self.client.get(url)
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code,200)
+
+    def test_url_resolve_correct_view(self):
+        view=resolve('/unit/1')
+        self.assertEqual(view.func.__name__,unit_detil.__name__)
+
+    def test_view_using_correct_template(self):
+        self.assertTemplateUsed(self.response,'unit_detil.html')
 
 
 class Test_View_New_Unit(TestCase):
@@ -65,7 +81,8 @@ class Test_View_New_Unit(TestCase):
         self.assertFormError(response,'form','code','Unit with this code already exist, please choose another code')
 
     def test_date_assign_not_yet_happened(self):
-        data = {'code': 'qwerty', 'type': 'd', 'date_assign': '14/4/2020'}
+        future_date=date.today()+timedelta(1)
+        data = {'code': 'qwerty', 'type': 'd', 'date_assign': future_date.strftime('%d/%m/%Y')}
         response = self.client.post(self.url,data)
         today = date.today()
         self.assertFormError(response,'form','date_assign',

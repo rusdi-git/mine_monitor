@@ -8,7 +8,9 @@ class UnitForm(forms.ModelForm):
                                   input_formats=('%d/%m/%Y',),label='Date Assign')
     def clean_code(self):
         data = self.cleaned_data['code']
-        if Unit.objects.filter(code=data).exists():
+        existsing_name = Unit.objects.filter(code=data).exists()
+        is_update = self.instance.pk
+        if not is_update and existsing_name or is_update and existsing_name and self.instance.code!=data:
             self.add_error('code','Unit with this code already exist, please choose another code')
         else:
             return data

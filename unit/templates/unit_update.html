@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+    {{block.super}}
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+{% endblock %}
+
+{% block content %}
+    <ol class="breadcrumb my-4">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item active">Update Unit</li>
+    </ol>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include 'includes/form.html' %}
+        <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+{% endblock %}
+
+{% block script %}
+    {{block.super}}
+    <script src="{% static 'js/jquery-ui.js' %}"></script>
+    <script src="{% static 'js/form.js' %}"></script>
+{% endblock %}

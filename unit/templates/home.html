@@ -5,5 +5,23 @@
 {% endblock %}
 
 {% block content %}
-    <h1>This is homepage</h1>
+    <h1>Rekap Unit</h1>
+    <table class="table table-hover table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>No</th>
+                <th>Kode</th>
+                <th>Tipe</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td><a href="{% url 'unitdetil' item.pk %}">{{item.code}}</a></td>
+                    <td>{{item.get_type_display}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock content %}
