@@ -1,0 +1,16 @@
+{% extends 'unit_home.html' %}
+
+{% block content %}
+    <ol class="breadcrumb my-4">
+        <li class="breadcrumb-item"><a href="{% url 'unithome' %}">Unit</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'unitdetil' unit.pk %}">{{unit.pk}}</a></li>
+        <li class="breadcrumb-item active">Delete</li>
+    </ol>
+    <br/>
+    <p><strong>Are you sure you want to delete this unit?</strong></p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <a class="btn btn-success" href="{% url 'unitdetil' unit.pk %}">Cancel</a>
+        <button type="submit" class="btn btn-danger">Yes</button>
+    </form>
+{% endblock %}

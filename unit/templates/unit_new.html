@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'unit_home.html' %}
 {% load static %}
 
 {% block style %}
@@ -8,8 +8,8 @@
 
 {% block content %}
     <ol class="breadcrumb my-4">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-        <li class="breadcrumb-item active">New Unit</li>
+        <li class="breadcrumb-item"><a href="{% url 'unithome' %}">Unit</a></li>
+        <li class="breadcrumb-item active">New</li>
     </ol>
     <form method="post" novalidate>
         {% csrf_token %}

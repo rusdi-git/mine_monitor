@@ -1,5 +1,9 @@
-{% extends 'home.html' %}
+{% extends 'unit_home.html' %}
 
 {% block content %}
     <h1>Detil Unit {{data.code}}</h1>
+    <p>Tipe : {{data.get_type_display}}</p>
+    <p>Tanggal Assign : {{data.date_assign}}</p>
+    <a class="btn btn-secondary" href="{% url 'unitupdate' data.pk %}">Update</a>
+    <a class="btn btn-danger" href="{% url 'unitdelete' data.pk %}">Delete</a>
 {% endblock %}
