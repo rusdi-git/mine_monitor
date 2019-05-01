@@ -3,7 +3,7 @@ from django.urls import reverse,resolve
 from datetime import date,timedelta
 
 from .models import Unit
-from .views import home, unit_home, UnitNew,unit_detil, UnitUpdate
+from .views import home, unit_home, UnitNew,unit_detil, UnitUpdate, UnitDelete, unit_query
 from .form import UnitForm
 
 # Create your tests here.
@@ -67,7 +67,7 @@ class Test_View_New_Unit(TestCase):
         view = resolve('/unit/new')
         self.assertEqual(view.func.__name__,UnitNew.__name__)
 
-    def view_using_correct_template(self):
+    def test_view_using_correct_template(self):
         self.assertTemplateUsed(self.get,'unit_new.html')
 
     def test_view_use_correct_form(self):
@@ -117,7 +117,7 @@ class Test_View_Update_Unit(TestCase):
         view = resolve('/unit/1/update')
         self.assertEqual(view.func.__name__,UnitUpdate.__name__)
 
-    def view_using_correct_template(self):
+    def test_view_using_correct_template(self):
         self.assertTemplateUsed(self.response,'unit_update.html')
 
     def test_view_use_correct_form(self):
@@ -127,7 +127,7 @@ class Test_View_Update_Unit(TestCase):
     def test_form_use_csrf(self):
         self.assertContains(self.response,'csrfmiddlewaretoken')
 
-    def test_success_unit_new_post(self):
+    def test_success_unit_update_post(self):
         data = {'code':'abcd','type':'d','date_assign':'14/4/2018'}
         response = self.client.post(self.url,data)
         unit_updated=Unit.objects.get(pk=1)
@@ -153,3 +153,56 @@ class Test_View_Update_Unit(TestCase):
         today = date.today()
         self.assertFormError(response,'form','date_assign',
                              'This date is not yet happen, max date is {}'.format(today.strftime('%d/%m/%Y')))
+
+class Test_View_Delete_Unit(TestCase):
+    def setUp(self):
+        Unit.objects.create(code='abcd', type='d', date_assign=date(2017, 6, 6))
+        Unit.objects.create(code='efgh', type='d', date_assign=date(2017, 6, 6))
+        self.url = reverse('unitdelete', kwargs={'pk': 1})
+        self.response = self.client.get(self.url)
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code,200)
+
+    def test_url_resolve_correct_view(self):
+        view = resolve('/unit/1/delete')
+        self.assertEqual(view.func.__name__,UnitDelete.__name__)
+
+    def test_view_using_correct_template(self):
+        self.assertTemplateUsed(self.response,'unit_delete.html')
+
+    def test_form_use_csrf(self):
+        self.assertContains(self.response,'csrfmiddlewaretoken')
+
+    def test_success_unit_delete_post(self):
+        self.assertTrue(Unit.objects.filter(pk=1).exists())
+        response = self.client.post(self.url)
+        self.assertFalse(Unit.objects.filter(pk=1).exists())
+        redirect_url = reverse('unithome')
+        self.assertRedirects(response,redirect_url)
+
+class Test_View_Query_Unit(TestCase):
+    def setUp(self):
+        Unit.objects.create(code='abcd', type='d', date_assign=date(2017, 6, 6))
+        Unit.objects.create(code='efgh', type='d', date_assign=date(2017, 6, 6))
+        Unit.objects.create(code='asdq', type='e', date_assign=date(2017, 6, 6))
+        self.url = reverse('unitquery')
+        self.response = self.client.get(self.url)
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code,200)
+
+    def test_url_resolve_correct_view(self):
+        view = resolve('/unit/query')
+        self.assertEqual(view.func.__name__,unit_query.__name__)
+
+    def view_using_correct_template(self):
+        self.assertTemplateUsed(self.response,'unit_query.html')
+
+    def test_parameter_query_result_correct_data(self):
+        # url = resolve('/unit/query?type=d')
+        # url = reverse('unitquery',kwargs={'type':'d'})
+        url ='{}?type=d'.format(reverse(unit_query))
+        response = self.client.get(url)
+        self.assertNotContains(response,'asdq')
+        self.assertContains(response,'abcd')

@@ -1,0 +1,65 @@
+{% extends 'unit_home.html' %}
+{% load static %}
+{% load templatehelpers %}
+
+{% block content %}
+    <ol class="breadcrumb my-4">
+        <li class="breadcrumb-item"><a href="{% url 'unithome' %}">Unit</a></li>
+        <li class="breadcrumb-item active">Query</li>
+    </ol>
+    <form action="{% url 'unitquery' %}" method="get">
+        {% include 'includes/form.html' with form=filterform %}
+        <button type="submit" class="btn btn-success">Search</button>
+    </form>
+    <br/>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th><input type="checkbox" id="allCheckChoice"/></th>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Date_Assign</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for form in formset.forms %}
+                <tr>
+                    <td>
+                        {{form.id}}
+                        {{form.is_checked}}
+                    </td>
+                    <td><a href="{url 'unitdetil' form.instance.id}">{{form.instance.code}}</a></td>
+                    <td>{{form.instance.get_type_display}}</td>
+                    <td>{{form.instance.date_assign}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {{formset.management_form}}
+    {% if data.has_other_pages %}
+        <ul class="pagination">
+            {% if data.has_previous %}
+                <li><a href="{% relative_url data.previous_page_number 'page' request.GET.urlencode %}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><span>&laquo;</span></li>
+            {% endif %}
+            {% for i in data.paginator.page_range %}
+                {% if data.number == i %}
+                    <li class="active"><span>{{i}}<span class="sr-only">(current)</span></span></li>
+                {% else %}
+                    <li><a href="{% relative_url i 'page' request.GET.urlencode %}">{{i}}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if data.has_next %}
+                <li><a href="{% relative_url data.next_page_number 'page' request.GET.urlencode %}">&raquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&raquo;</span></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+    {{block.super}}
+    <script src="{% static 'js/form.js' %}"></script>
+{% endblock %}

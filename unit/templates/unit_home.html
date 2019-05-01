@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
 {% block sidebar %}
-    <a href="{% url 'unitnew' %}">New Unit</a>
+    <nav class="nav flex-column">
+        <a href="{% url 'unitnew' %}" class="nav-item nav-link">New Unit</a>
+        <a href="{% url 'unitquery' %}" class="nav-item nav-link">Query Unit</a>
+    </nav>
 {% endblock %}
 
 {% block content %}

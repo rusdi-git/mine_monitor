@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.models import modelformset_factory
 from datetime import date
 
 from .models import Unit
@@ -28,3 +29,12 @@ class UnitForm(forms.ModelForm):
     class Meta:
         model = Unit
         fields = '__all__'
+
+
+UnitFormSetBase = modelformset_factory(Unit,extra=0,exclude=('code','type','date_assign'))
+
+class UnitFormSet(UnitFormSetBase):
+    def add_fields(self,form,index):
+        super().add_fields(form,index)
+        form.fields['is_checked']=forms.BooleanField(required=False,
+                                                     widget=forms.CheckboxInput(attrs={'class':'CheckChoice'}))
