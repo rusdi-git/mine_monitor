@@ -1,17 +1,20 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView,DeleteView
 from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
+from django.db.models import Count
 
 from .models import Unit
-from .form import UnitForm,UnitFormSet
+from .forms import UnitForm,UnitFormSet
 from .filter import UnitFilter
+from custom_code.views import generate_simple_summary
 # Create your views here.
 def home(request):
     return render(request,'home.html')
 
 def unit_home(request):
-    data = Unit.objects.all()
+    query = Unit.objects.values('type').annotate(jumlah=Count('id'))
+    data=generate_simple_summary(query,'type')
     return render(request,'unit_home.html',{'data':data})
 
 def unit_detil(request,pk):
@@ -41,7 +44,18 @@ class UnitDelete(DeleteView):
 
 def unit_query(request):
     if request.method=='POST':
-        pass
+        action=request.POST.get('action')
+        if action=='activate':
+            data_id=[]
+            formset=UnitFormSet(request.POST,queryset=Unit.objects.all())
+            if formset.is_valid():
+                for form in formset.froms:
+                    if form.cleaned_date.get('is_checked'):
+                        data_id.append(form.cleaned_data.get('id').id)
+                if data_id:
+                    queryset=Unit.objects.filter(id__in=data_id)
+                    pass
+            return redirect('unithome')
     else:
         unit_list=Unit.objects.all().order_by('id')
         unit_filter=UnitFilter(request.GET,queryset=unit_list)
@@ -58,8 +72,7 @@ def unit_query(request):
         context={'data':data,'formset':formset,'filterform':unit_filter.form}
         return render(request,'unit_query.html',context)
 
-def set_mohh(request):
-    if request.method=='POST':
-        pass
-    else:
-        data=request.GET['data']
+def toggle_mohh(request,query=None):
+    action=request.POST.get('action')
+    if action=='execute_activation':
+        data_id=[]

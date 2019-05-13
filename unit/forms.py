@@ -38,3 +38,11 @@ class UnitFormSet(UnitFormSetBase):
         super().add_fields(form,index)
         form.fields['is_checked']=forms.BooleanField(required=False,
                                                      widget=forms.CheckboxInput(attrs={'class':'CheckChoice'}))
+
+class SetMOHHFormSet(UnitFormSetBase):
+    def add_fields(self,form,index):
+        super().add_fields(form,index)
+        form.fields['start_mohh']=forms.DateField(widget=forms.DateInput(attrs={'class':'date_input'},
+                                                                         format='%d/%m/%Y'),
+                                                  input_formats=('%d/%m/%Y'))
+

@@ -12,7 +12,8 @@
         <button type="submit" class="btn btn-success">Search</button>
     </form>
     <br/>
-    <table class="table table-bordered">
+    <form>
+        <table class="table table-bordered">
         <thead class="thead-dark">
             <tr>
                 <th><input type="checkbox" id="allCheckChoice"/></th>
@@ -36,6 +37,9 @@
         </tbody>
     </table>
     {{formset.management_form}}
+        <button name="action" value="activate" type="submit" class="btn btn-success">Activate Unit</button>
+        <button name="action" value="deactivate" type="submit" class="btn btn-warning">Deactivate Unit</button>
+    </form>
     {% if data.has_other_pages %}
         <ul class="pagination">
             {% if data.has_previous %}

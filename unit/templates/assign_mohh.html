@@ -1,0 +1,51 @@
+{% extends 'unit_home.html' %}
+
+{% load static %}
+
+{% block style %}
+    {{block.super}}
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+{% endblock style %}
+
+{% block content %}
+    <ol class="breadcrumb my-4">
+        <li class="breadcrumb-item"><a href="{% url 'unithome' %}">Unit</a></li>
+        <li class="breadcrumb-item active">Assign_MOHH</li>
+    </ol>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <h3>Data to be processed</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Date MOHH
+                    <input type="text" id="all_date_input"/></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if formset.non_form_errors %}
+                    {% for e in formset.non_form_errors %}
+                        <div class="alert alert-danger" role="alert">{{e}}</div>
+                    {% endfor %}
+                {% endif %}
+                {% for form in formset %}
+                    <tr>
+                        <td>{{form.id}}{{form.instance.code}}</td>
+                        <td>{{form.instance.type}}</td>
+                        <td>{{form.start_mohh}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{formset.management_form}}
+        <button class="btn btn-success">Submit</button>
+    </form>
+{% endblock content %}
+
+{% block script %}
+    {{block.super}}
+    <script src="{% static 'js/jquery-ui.js' %}"></script>
+    <script src="{% static 'js/form.js' %}"></script>
+{% endblock %}
