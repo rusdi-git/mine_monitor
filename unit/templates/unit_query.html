@@ -12,7 +12,8 @@
         <button type="submit" class="btn btn-success">Search</button>
     </form>
     <br/>
-    <form>
+    <form method="post" novalidate>
+        {% csrf_token %}
         <table class="table table-bordered">
         <thead class="thead-dark">
             <tr>

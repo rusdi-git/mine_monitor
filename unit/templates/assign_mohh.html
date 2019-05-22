@@ -21,7 +21,7 @@
                     <th>Code</th>
                     <th>Type</th>
                     <th>Date MOHH
-                    <input type="text" id="all_date_input"/></th>
+                    <input type="text" id="all_date_input" class="date_input"/></th>
                 </tr>
             </thead>
             <tbody>
@@ -33,7 +33,7 @@
                 {% for form in formset %}
                     <tr>
                         <td>{{form.id}}{{form.instance.code}}</td>
-                        <td>{{form.instance.type}}</td>
+                        <td>{{form.instance.get_type_display}}</td>
                         <td>{{form.start_mohh}}</td>
                     </tr>
                 {% endfor %}

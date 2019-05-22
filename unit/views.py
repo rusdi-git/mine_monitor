@@ -4,8 +4,8 @@ from django.views.generic import CreateView, UpdateView,DeleteView
 from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
 from django.db.models import Count
 
-from .models import Unit
-from .forms import UnitForm,UnitFormSet
+from .models import Unit,Mohh
+from .forms import UnitForm,UnitFormSet,StartMOHHFormSet
 from .filter import UnitFilter
 from custom_code.views import generate_simple_summary
 # Create your views here.
@@ -42,6 +42,21 @@ class UnitDelete(DeleteView):
     context_object_name = 'unit'
     template_name = 'unit_delete.html'
 
+def start_mohh(request,query=None):
+    action=request.POST.get('action')
+    if action=='activate':
+        formset=StartMOHHFormSet(queryset=query)
+        return render(request,'assign_mohh.html',{'formset':formset})
+    elif action=='activate_execute':
+        formset=StartMOHHFormSet(request,queryset=Unit.objects.all())
+        if formset.is_valid():
+            for form in formset.forms:
+                unit=form.cleaned_data.get('id')
+                start_date=form.cleaned_data.get('start_mohh')
+                data=Mohh(unit=unit,start=start_date)
+                data.save()
+            return redirect('unit_home')
+
 def unit_query(request):
     if request.method=='POST':
         action=request.POST.get('action')
@@ -49,13 +64,15 @@ def unit_query(request):
             data_id=[]
             formset=UnitFormSet(request.POST,queryset=Unit.objects.all())
             if formset.is_valid():
-                for form in formset.froms:
-                    if form.cleaned_date.get('is_checked'):
+                for form in formset.forms:
+                    if form.cleaned_data.get('is_checked'):
                         data_id.append(form.cleaned_data.get('id').id)
                 if data_id:
                     queryset=Unit.objects.filter(id__in=data_id)
-                    pass
-            return redirect('unithome')
+                    return start_mohh(request,query=queryset)
+        elif action=='activate_execute':
+            return start_mohh(request)
+        return redirect('unithome')
     else:
         unit_list=Unit.objects.all().order_by('id')
         unit_filter=UnitFilter(request.GET,queryset=unit_list)
@@ -71,8 +88,3 @@ def unit_query(request):
         formset=UnitFormSet(queryset=page_query)
         context={'data':data,'formset':formset,'filterform':unit_filter.form}
         return render(request,'unit_query.html',context)
-
-def toggle_mohh(request,query=None):
-    action=request.POST.get('action')
-    if action=='execute_activation':
-        data_id=[]
