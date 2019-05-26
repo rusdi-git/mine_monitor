@@ -1,8 +1,9 @@
 from django import forms
 from django.forms.models import modelformset_factory
 from datetime import date
+from django.utils import timezone
 
-from .models import Unit
+from .models import Unit,Mohh
 
 class UnitForm(forms.ModelForm):
     date_assign = forms.DateField(widget=forms.DateInput(format='%d/%m/%Y', attrs={'class':'date_input'}),
@@ -42,7 +43,65 @@ class UnitFormSet(UnitFormSetBase):
 class StartMOHHFormSet(UnitFormSetBase):
     def add_fields(self,form,index):
         super().add_fields(form,index)
-        form.fields['start_mohh']=forms.DateField(widget=forms.DateInput(attrs={'class':'date_input'},
-                                                                         format='%d/%m/%Y'),
-                                                  input_formats=('%d/%m/%Y'))
+        form.fields['start_mohh'] = forms.SplitDateTimeField(widget=forms.SplitDateTimeWidget(date_format='%d/%m/%Y',
+                                                                              date_attrs={
+                                                                                  'class': 'date_input'},
+                                                                              time_format='%H:%M',
+                                                                              time_attrs={
+                                                                                  'class': 'time_input'}),
+                                             input_date_formats=('%d/%m/%Y',),
+                                             input_time_formats=('%H:%M',),
+                                             initial=timezone.now(),
+                                                             )
 
+    def clean(self):
+        if any(self.errors):
+            return
+        for form in self.forms:
+            start_event=form.cleaned_data.get('start_mohh')
+            last_mohh=form.instance.get_latest_mohh()
+            if last_mohh and not last_mohh.end:
+                form.add_error('start_mohh','This unit is still active')
+            if start_event>timezone.now():
+                form.add_error('start_mohh','This date is not yet happened')
+
+    def save(self):
+        for form in self.forms:
+            unit=form.instance
+            start=form.cleaned_data.get('start_mohh')
+            Mohh.objects.create(unit=unit,start=start)
+
+
+
+class EndMOHHFormSet(UnitFormSetBase):
+    def add_fields(self,form,index):
+        super().add_fields(form,index)
+        form.fields['end_mohh'] = forms.SplitDateTimeField(widget=forms.SplitDateTimeWidget(date_format='%d/%m/%Y',
+                                                                              date_attrs={
+                                                                                  'class': 'date_input'},
+                                                                              time_format='%H:%M',
+                                                                              time_attrs={
+                                                                                  'class': 'time_input'}),
+                                             input_date_formats=('%d/%m/%Y',),
+                                             input_time_formats=('%H:%M',),
+                                             initial=timezone.now(),
+                                                             )
+
+    def clean(self):
+        if any(self.errors):
+            return
+        for form in self.forms:
+            end_event=form.cleaned_data.get('end_mohh')
+            last_mohh=form.instance.get_latest_mohh()
+            if last_mohh and last_mohh.end or not last_mohh:
+                form.add_error('end_mohh','This unit is still non-active')
+            if end_event>timezone.now():
+                form.add_error('end_mohh','This time is not yet happened')
+
+    def save(self):
+        for form in self.forms:
+            unit=form.instance
+            mohh=unit.get_latest_mohh()
+            end=form.cleaned_data.get('start_mohh')
+            mohh.end=end
+            mohh.save()

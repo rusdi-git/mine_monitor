@@ -5,7 +5,7 @@ from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
 from django.db.models import Count
 
 from .models import Unit,Mohh
-from .forms import UnitForm,UnitFormSet,StartMOHHFormSet
+from .forms import UnitForm,UnitFormSet,StartMOHHFormSet,EndMOHHFormSet
 from .filter import UnitFilter
 from custom_code.views import generate_simple_summary
 # Create your views here.
@@ -48,19 +48,30 @@ def start_mohh(request,query=None):
         formset=StartMOHHFormSet(queryset=query)
         return render(request,'assign_mohh.html',{'formset':formset})
     elif action=='activate_execute':
-        formset=StartMOHHFormSet(request,queryset=Unit.objects.all())
+        formset=StartMOHHFormSet(request.POST,queryset=Unit.objects.all())
         if formset.is_valid():
-            for form in formset.forms:
-                unit=form.cleaned_data.get('id')
-                start_date=form.cleaned_data.get('start_mohh')
-                data=Mohh(unit=unit,start=start_date)
-                data.save()
-            return redirect('unit_home')
+            formset.save()
+            return redirect('unitquery')
+        else:
+            return render(request,'assign_mohh.html',{'formset':formset})
+
+def end_mohh(request,query=None):
+    action=request.POST.get('action')
+    if action=='deactivate':
+        formset=EndMOHHFormSet(queryset=query)
+        return render(request,'end_mohh.html',{'formset':formset})
+    elif action=='deactivate_execute':
+        formset=EndMOHHFormSet(request.POST,queryset=Unit.objects.all())
+        if formset.is_valid():
+            formset.save()
+            return redirect('unitquery')
+        else:
+            return render(request,'end_mohh.html',{'formset':formset})
 
 def unit_query(request):
     if request.method=='POST':
         action=request.POST.get('action')
-        if action=='activate':
+        if action in('activate','deactivate'):
             data_id=[]
             formset=UnitFormSet(request.POST,queryset=Unit.objects.all())
             if formset.is_valid():
@@ -69,9 +80,15 @@ def unit_query(request):
                         data_id.append(form.cleaned_data.get('id').id)
                 if data_id:
                     queryset=Unit.objects.filter(id__in=data_id)
-                    return start_mohh(request,query=queryset)
-        elif action=='activate_execute':
-            return start_mohh(request)
+            if action=='activate':
+                return start_mohh(request,query=queryset)
+            elif action=='deactivate':
+                return end_mohh(request, query=queryset)
+        elif action in('activate_execute','deactivate_execute'):
+            if action=='activate_execute':
+                return start_mohh(request)
+            if action=='deactivate_execute':
+                return end_mohh(request)
         return redirect('unithome')
     else:
         unit_list=Unit.objects.all().order_by('id')

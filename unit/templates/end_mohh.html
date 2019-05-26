@@ -11,7 +11,7 @@
 {% block content %}
     <ol class="breadcrumb my-4">
         <li class="breadcrumb-item"><a href="{% url 'unithome' %}">Unit</a></li>
-        <li class="breadcrumb-item active">Assign_MOHH</li>
+        <li class="breadcrumb-item active">END_MOHH</li>
     </ol>
     <form method="post" novalidate>
         {% csrf_token %}
@@ -44,7 +44,7 @@
             </tbody>
         </table>
         {{formset.management_form}}
-        <button name="action" value="activate_execute" class="btn btn-success">Execute</button>
+        <button name="action" value="deactivate_execute" class="btn btn-success">Execute</button>
     </form>
 {% endblock content %}
 
