@@ -21,3 +21,10 @@ class Mohh(models.Model):
     unit = models.ForeignKey('Unit',on_delete=models.CASCADE)
     start = models.DateTimeField()
     end = models.DateTimeField(blank=True, null=True)
+
+    def duration(self):
+        duration=None
+        if self.end:
+            diff=self.end-self.start
+            duration=diff.total_seconds()/3600
+        return duration

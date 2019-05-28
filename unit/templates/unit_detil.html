@@ -6,4 +6,23 @@
     <p>Tanggal Assign : {{data.date_assign}}</p>
     <a class="btn btn-secondary" href="{% url 'unitupdate' data.pk %}">Update</a>
     <a class="btn btn-danger" href="{% url 'unitdelete' data.pk %}">Delete</a>
+
+    {% if unit.mohh_set %}
+        <table class="table table-bordered">
+            <thead>
+                <th>Start</th>
+                <th>End</th>
+                <th>Duration</th>
+            </thead>
+            <tbody>
+            {% for data in unit.mohh_set.all %}
+                <tr>
+                    <td>{{data.start}}</td>
+                    <td>{{data.end}}</td>
+                    <td>{{data.duration}} jam</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 {% endblock %}

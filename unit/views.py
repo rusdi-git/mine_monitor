@@ -5,7 +5,7 @@ from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
 from django.db.models import Count
 
 from .models import Unit,Mohh
-from .forms import UnitForm,UnitFormSet,StartMOHHFormSet,EndMOHHFormSet
+from .forms import UnitForm,UnitFormSet,StartMOHHFormSet,EndMOHHFormSet,MOHHForm
 from .filter import UnitFilter
 from custom_code.views import generate_simple_summary
 # Create your views here.
@@ -105,3 +105,12 @@ def unit_query(request):
         formset=UnitFormSet(queryset=page_query)
         context={'data':data,'formset':formset,'filterform':unit_filter.form}
         return render(request,'unit_query.html',context)
+
+class MOHHUpdate(UpdateView):
+    model = Mohh
+    form_class = MOHHForm
+    template_name = 'mohh_update.html'
+    context_object_name = 'mohh'
+    def get_success_url(self):
+        mohh=self.object
+        return reverse_lazy('unitdetil',kwargs={'pk':mohh.unit.pk})
